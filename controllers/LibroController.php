@@ -16,9 +16,8 @@ class LibroController extends ActiveRecord {
     public static function guardarAPI() {
         getHeadersApi();
         
-        $_POST['titulo'] = ucwords(strtolower(trim(htmlspecialchars($_POST['titulo']))));
-        $_POST['autor'] = ucwords(strtolower(trim(htmlspecialchars($_POST['autor']))));
-        $_POST['persona_prestado'] = ucwords(strtolower(trim(htmlspecialchars($_POST['persona_prestado']))));
+        $_POST['titulo'] = trim(htmlspecialchars($_POST['titulo']));
+        $_POST['autor'] = trim(htmlspecialchars($_POST['autor']));
         
         if (strlen($_POST['titulo']) < 2) {
             http_response_code(400);
@@ -41,8 +40,7 @@ class LibroController extends ActiveRecord {
         try {
             $data = new Libros([
                 'titulo' => $_POST['titulo'],
-                'autor' => $_POST['autor'],
-                'persona_prestado' => $_POST['persona_prestado']
+                'autor' => $_POST['autor']
             ]);
             
             $crear = $data->crear();
@@ -90,9 +88,8 @@ class LibroController extends ActiveRecord {
         
         $id = $_POST['id'];
         
-        $_POST['titulo'] = ucwords(strtolower(trim(htmlspecialchars($_POST['titulo']))));
-        $_POST['autor'] = ucwords(strtolower(trim(htmlspecialchars($_POST['autor']))));
-        $_POST['persona_prestado'] = ucwords(strtolower(trim(htmlspecialchars($_POST['persona_prestado']))));
+        $_POST['titulo'] = trim(htmlspecialchars($_POST['titulo']));
+        $_POST['autor'] = trim(htmlspecialchars($_POST['autor']));
         
         if (strlen($_POST['titulo']) < 2) {
             http_response_code(400);
@@ -117,8 +114,7 @@ class LibroController extends ActiveRecord {
             
             $data->sincronizar([
                 'titulo' => $_POST['titulo'],
-                'autor' => $_POST['autor'],
-                'persona_prestado' => $_POST['persona_prestado']
+                'autor' => $_POST['autor']
             ]);
             
             $data->actualizar();

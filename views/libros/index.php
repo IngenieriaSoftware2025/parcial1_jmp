@@ -9,7 +9,7 @@
                     </div>
                     <form id="FormLibros" class="p-4 bg-white rounded-3 shadow-sm border">
                         <input type="hidden" id="id" name="id">
-                        <div class="row g-4 mb-3">
+                        <div class="row g-4 mb-4">
                             <div class="col-md-6">
                                 <label for="titulo" class="form-label">Título del Libro</label>
                                 <input type="text" class="form-control form-control-lg" id="titulo" name="titulo" placeholder="Ingrese el título del libro" required>
@@ -17,12 +17,6 @@
                             <div class="col-md-6">
                                 <label for="autor" class="form-label">Autor</label>
                                 <input type="text" class="form-control form-control-lg" id="autor" name="autor" placeholder="Ingrese el nombre del autor" required>
-                            </div>
-                        </div>
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-6">
-                                <label for="persona_prestado" class="form-label">Prestado a</label>
-                                <input type="text" class="form-control form-control-lg" id="persona_prestado" name="persona_prestado" placeholder="Nombre de la persona (dejar vacío si está disponible)">
                             </div>
                         </div>
                         <div class="d-flex justify-content-center gap-3">

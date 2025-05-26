@@ -10,7 +10,6 @@ const BtnModificar = document.getElementById('BtnModificar');
 const BtnLimpiar = document.getElementById('BtnLimpiar');
 
 const GuardarLibro = async (event) => {
-
     event.preventDefault();
     BtnGuardar.disabled = true;
 
@@ -23,6 +22,7 @@ const GuardarLibro = async (event) => {
             showConfirmButton: true,
         });
         BtnGuardar.disabled = false;
+        return;
     }
 
     const body = new FormData(FormLibros);
@@ -51,7 +51,6 @@ const GuardarLibro = async (event) => {
             BuscarLibros();
 
         } else {
-            
             await Swal.fire({
                 position: "center",
                 icon: "error",
@@ -143,7 +142,6 @@ const datatable = new DataTable('#TableLibros', {
                          data-id="${data}" 
                          data-titulo="${row.titulo}"  
                          data-autor="${row.autor}"  
-                         data-persona_prestado="${row.persona_prestado || ''}"  
                          <i class='bi bi-pencil-square me-1'></i> Modificar
                      </button>
                      <button class='btn btn-danger eliminar mx-1' 
@@ -162,7 +160,8 @@ const llenarFormulario = (event) => {
     document.getElementById('id').value = datos.id
     document.getElementById('titulo').value = datos.titulo
     document.getElementById('autor').value = datos.autor
-    document.getElementById('persona_prestado').value = datos.persona_prestado
+    // ✅ ELIMINAMOS esta línea que causaba el error:
+    // document.getElementById('persona_prestado').value = datos.persona_prestado
 
     BtnGuardar.classList.add('d-none');
     BtnModificar.classList.remove('d-none');

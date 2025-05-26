@@ -17,7 +17,7 @@ class PrestamoController extends ActiveRecord {
         getHeadersApi();
         
         $_POST['libro_id'] = trim(htmlspecialchars($_POST['libro_id']));
-        $_POST['persona_prestado'] = ucwords(strtolower(trim(htmlspecialchars($_POST['persona_prestado']))));
+        $_POST['persona_prestado'] = trim(htmlspecialchars($_POST['persona_prestado']));
         
         if (strlen($_POST['persona_prestado']) < 2) {
             http_response_code(400);
@@ -65,10 +65,37 @@ class PrestamoController extends ActiveRecord {
     
     public static function buscarAPI() {
         try {
+            $fechaInicio = $_GET['fechaInicio'] ?? '';
+            $fechaFin = $_GET['fechaFin'] ?? '';
+            $estado = $_GET['estado'] ?? '';
+            
             $sql = "SELECT p.*, l.titulo, l.autor 
                     FROM prestamos p 
-                    INNER JOIN libros l ON p.libro_id = l.id 
-                    ORDER BY p.fecha_prestamo DESC";
+                    INNER JOIN libros l ON p.libro_id = l.id";
+            
+            $condiciones = [];
+            
+            // Filtro por fecha de inicio - Formato correcto para DATETIME
+            if (!empty($fechaInicio)) {
+                $condiciones[] = "p.fecha_prestamo >= '$fechaInicio 00:00:00'";
+            }
+            
+            // Filtro por fecha de fin - Formato correcto para DATETIME
+            if (!empty($fechaFin)) {
+                $condiciones[] = "p.fecha_prestamo <= '$fechaFin 23:59:59'";
+            }
+            
+            // Filtro por estado
+            if (!empty($estado)) {
+                $condiciones[] = "p.devuelto = '$estado'";
+            }
+            
+            if (!empty($condiciones)) {
+                $sql .= " WHERE " . implode(" AND ", $condiciones);
+            }
+            
+            $sql .= " ORDER BY p.fecha_prestamo DESC";
+            
             $data = self::fetchArray($sql);
             
             http_response_code(200);
@@ -95,6 +122,15 @@ class PrestamoController extends ActiveRecord {
         
         try {
             $data = Prestamos::find($id);
+            
+            if (!$data) {
+                http_response_code(400);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Préstamo no encontrado'
+                ]);
+                return;
+            }
             
             $data->sincronizar([
                 'fecha_devolucion' => date('Y-m-d H:i:s'),

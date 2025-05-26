@@ -7,6 +7,8 @@ import { lenguaje } from "../lenguaje";
 const FormPrestamos = document.getElementById('FormPrestamos');
 const BtnGuardar = document.getElementById('BtnGuardar');
 const BtnLimpiar = document.getElementById('BtnLimpiar');
+const BtnFiltrar = document.getElementById('BtnFiltrar');
+const BtnLimpiarFiltros = document.getElementById('BtnLimpiarFiltros');
 const selectLibro = document.getElementById('libro_id');
 
 const GuardarPrestamo = async (event) => {
@@ -67,8 +69,19 @@ const GuardarPrestamo = async (event) => {
     BtnGuardar.disabled = false;
 }
 
-const BuscarPrestamos = async () => {
-    const url = `/parcial1_jmp/prestamos/buscarAPI`;
+const BuscarPrestamos = async (filtros = {}) => {
+    let url = `/parcial1_jmp/prestamos/buscarAPI`;
+    
+    // Construir parámetros de filtro (SOLO FECHAS)
+    const params = new URLSearchParams();
+    if (filtros.fechaInicio) params.append('fechaInicio', filtros.fechaInicio);
+    if (filtros.fechaFin) params.append('fechaFin', filtros.fechaFin);
+    if (filtros.estado) params.append('estado', filtros.estado);
+    
+    if (params.toString()) {
+        url += `?${params.toString()}`;
+    }
+    
     const config = {
         method: 'GET'
     }
@@ -76,11 +89,18 @@ const BuscarPrestamos = async () => {
     try {
         const respuesta = await fetch(url, config);
         const datos = await respuesta.json();
-        const { codigo, mensaje, data } = datos
+        
+        console.log('Datos recibidos:', datos);
+        
+        const codigo = datos.codigo;
+        const mensaje = datos.mensaje;
+        const data = datos.data;
 
         if (codigo == 1) {
             datatable.clear().draw();
-            datatable.rows.add(data).draw();
+            if (data && data.length > 0) {
+                datatable.rows.add(data).draw();
+            }
         } else {
             await Swal.fire({
                 position: "center",
@@ -92,7 +112,14 @@ const BuscarPrestamos = async () => {
         }
 
     } catch (error) {
-        console.log(error)
+        console.log('Error en BuscarPrestamos:', error);
+        await Swal.fire({
+            position: "center",
+            icon: "error",
+            title: "Error de conexión",
+            text: "No se pudieron cargar los préstamos",
+            showConfirmButton: true,
+        });
     }
 }
 
@@ -143,35 +170,80 @@ const datatable = new DataTable('#TablePrestamos', {
         {
             title: 'No.',
             data: 'id',
-            width: '%',
+            width: '5%',
             render: (data, type, row, meta) => meta.row + 1
         },
-        { title: 'Libro', data: 'titulo' },
-        { title: 'Autor', data: 'autor' },
-        { title: 'Prestado a', data: 'persona_prestado' },
         { 
-            title: 'Fecha Préstamo', 
+            title: 'Libro', 
+            data: 'titulo',
+            width: '25%'
+        },
+        { 
+            title: 'Autor', 
+            data: 'autor',
+            width: '20%'
+        },
+        { 
+            title: 'Prestado a', 
+            data: 'persona_prestado',
+            width: '15%'
+        },
+        { 
+            title: 'Fecha y Hora de Préstamo', 
             data: 'fecha_prestamo',
+            width: '15%',
             render: (data) => {
                 const fecha = new Date(data);
-                return fecha.toLocaleDateString('es-ES');
+                const fechaFormateada = fecha.toLocaleDateString('es-ES');
+                const horaFormateada = fecha.toLocaleTimeString('es-ES', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                return `<div class="text-center">
+                    <div class="fw-bold">${fechaFormateada}</div>
+                    <small class="text-muted">${horaFormateada}</small>
+                </div>`;
             }
         },
         {
             title: 'Estado',
             data: 'devuelto',
+            width: '15%',
             render: (data, type, row) => {
                 if (data === 'S') {
                     const fechaDevolucion = new Date(row.fecha_devolucion);
-                    return `<span class="badge bg-success">Devuelto (${fechaDevolucion.toLocaleDateString('es-ES')})</span>`;
+                    const fechaFormateada = fechaDevolucion.toLocaleDateString('es-ES');
+                    const horaFormateada = fechaDevolucion.toLocaleTimeString('es-ES', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                    return `<span class="badge bg-success">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Devuelto<br>
+                        <small>${fechaFormateada} ${horaFormateada}</small>
+                    </span>`;
                 } else {
-                    return `<span class="badge bg-warning">Prestado</span>`;
+                    const fechaPrestamo = new Date(row.fecha_prestamo);
+                    const hoy = new Date();
+                    const diasPrestado = Math.floor((hoy - fechaPrestamo) / (1000 * 60 * 60 * 24));
+                    
+                    let badgeClass = 'bg-warning';
+                    if (diasPrestado > 30) badgeClass = 'bg-danger';
+                    else if (diasPrestado > 15) badgeClass = 'bg-warning';
+                    else badgeClass = 'bg-info';
+                    
+                    return `<span class="badge ${badgeClass}">
+                        <i class="bi bi-clock me-1"></i>
+                        Prestado<br>
+                        <small>(${diasPrestado} días)</small>
+                    </span>`;
                 }
             }
         },
         {
             title: 'Acciones',
             data: 'id',
+            width: '15%',
             searchable: false,
             orderable: false,
             render: (data, type, row, meta) => {
@@ -179,19 +251,19 @@ const datatable = new DataTable('#TablePrestamos', {
                 
                 if (row.devuelto === 'N') {
                     botones += `
-                        <button class='btn btn-success devolver mx-1' 
+                        <button class='btn btn-success btn-sm devolver mx-1' 
                             data-id="${data}">
                             <i class='bi bi-check-circle me-1'></i> Devolver
                         </button>`;
                 }
                 
                 botones += `
-                    <button class='btn btn-danger eliminar mx-1' 
+                    <button class='btn btn-danger btn-sm eliminar mx-1' 
                         data-id="${data}">
                         <i class="bi bi-trash3 me-1"></i>Eliminar
                     </button>`;
                 
-                return `<div class='d-flex justify-content-center'>${botones}</div>`;
+                return `<div class='d-flex justify-content-center flex-wrap'>${botones}</div>`;
             }
         }
     ]
@@ -199,6 +271,40 @@ const datatable = new DataTable('#TablePrestamos', {
 
 const limpiarTodo = () => {
     FormPrestamos.reset();
+}
+
+// Función para aplicar filtros (SOLO FECHAS)
+const aplicarFiltros = () => {
+    const fechaInicio = document.getElementById('fechaInicio').value;
+    const fechaFin = document.getElementById('fechaFin').value;
+    const estado = document.getElementById('estadoFiltro').value;
+    
+    // Validación: si pones fecha inicio, debe ser menor que fecha fin
+    if (fechaInicio && fechaFin && fechaInicio > fechaFin) {
+        Swal.fire({
+            position: "center",
+            icon: "warning",
+            title: "Fechas incorrectas",
+            text: "La fecha de inicio debe ser menor que la fecha de fin",
+            showConfirmButton: true,
+        });
+        return;
+    }
+    
+    const filtros = {};
+    if (fechaInicio) filtros.fechaInicio = fechaInicio;
+    if (fechaFin) filtros.fechaFin = fechaFin;
+    if (estado) filtros.estado = estado;
+    
+    BuscarPrestamos(filtros);
+}
+
+// Función para limpiar filtros (SOLO FECHAS)
+const limpiarFiltros = () => {
+    document.getElementById('fechaInicio').value = '';
+    document.getElementById('fechaFin').value = '';
+    document.getElementById('estadoFiltro').value = '';
+    BuscarPrestamos();
 }
 
 const DevolverLibro = async (e) => {
@@ -320,3 +426,5 @@ datatable.on('click', '.eliminar', EliminarPrestamo);
 datatable.on('click', '.devolver', DevolverLibro);
 FormPrestamos.addEventListener('submit', GuardarPrestamo);
 BtnLimpiar.addEventListener('click', limpiarTodo);
+BtnFiltrar.addEventListener('click', aplicarFiltros);
+BtnLimpiarFiltros.addEventListener('click', limpiarFiltros);
