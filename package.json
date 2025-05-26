@@ -1,7 +1,7 @@
 {
-  "name": "demo-app",
+  "name": "parcial1_jmp",
   "version": "1.0.0",
-  "description": "Aplicacion MVC demo",
+  "description": "Aplicacion MVC para el control basico de libros",
   "main": "index.js",
   "scripts": {
     "build": "webpack",
