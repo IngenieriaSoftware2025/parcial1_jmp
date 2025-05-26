@@ -16,9 +16,9 @@ class LibroController extends ActiveRecord {
     public static function guardarAPI() {
         getHeadersApi();
         
-        $_POST['titulo'] = trim(htmlspecialchars($_POST['titulo']));
-        $_POST['autor'] = trim(htmlspecialchars($_POST['autor']));
-        $_POST['persona_prestado'] = trim(htmlspecialchars($_POST['persona_prestado']));
+        $_POST['titulo'] = ucwords(strtolower(trim(htmlspecialchars($_POST['titulo']))));
+        $_POST['autor'] = ucwords(strtolower(trim(htmlspecialchars($_POST['autor']))));
+        $_POST['persona_prestado'] = ucwords(strtolower(trim(htmlspecialchars($_POST['persona_prestado']))));
         
         if (strlen($_POST['titulo']) < 2) {
             http_response_code(400);
@@ -90,9 +90,9 @@ class LibroController extends ActiveRecord {
         
         $id = $_POST['id'];
         
-        $_POST['titulo'] = trim(htmlspecialchars($_POST['titulo']));
-        $_POST['autor'] = trim(htmlspecialchars($_POST['autor']));
-        $_POST['persona_prestado'] = trim(htmlspecialchars($_POST['persona_prestado']));
+        $_POST['titulo'] = ucwords(strtolower(trim(htmlspecialchars($_POST['titulo']))));
+        $_POST['autor'] = ucwords(strtolower(trim(htmlspecialchars($_POST['autor']))));
+        $_POST['persona_prestado'] = ucwords(strtolower(trim(htmlspecialchars($_POST['persona_prestado']))));
         
         if (strlen($_POST['titulo']) < 2) {
             http_response_code(400);

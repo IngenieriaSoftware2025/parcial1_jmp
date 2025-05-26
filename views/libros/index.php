@@ -21,7 +21,7 @@
                         </div>
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
-                                <label for="persona_prestado" class="form-label">Prestado a (opcional)</label>
+                                <label for="persona_prestado" class="form-label">Prestado a</label>
                                 <input type="text" class="form-control form-control-lg" id="persona_prestado" name="persona_prestado" placeholder="Nombre de la persona (dejar vacío si está disponible)">
                             </div>
                         </div>
