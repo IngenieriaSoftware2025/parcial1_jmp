@@ -75,17 +75,14 @@ class PrestamoController extends ActiveRecord {
             
             $condiciones = [];
             
-            // Filtro por fecha de inicio - Formato correcto para DATETIME
             if (!empty($fechaInicio)) {
                 $condiciones[] = "p.fecha_prestamo >= '$fechaInicio 00:00:00'";
             }
             
-            // Filtro por fecha de fin - Formato correcto para DATETIME
             if (!empty($fechaFin)) {
                 $condiciones[] = "p.fecha_prestamo <= '$fechaFin 23:59:59'";
             }
             
-            // Filtro por estado
             if (!empty($estado)) {
                 $condiciones[] = "p.devuelto = '$estado'";
             }

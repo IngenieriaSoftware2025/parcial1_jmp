@@ -16,7 +16,7 @@ class LibroController extends ActiveRecord {
     public static function guardarAPI() {
         getHeadersApi();
         
-        $_POST['titulo'] = trim(htmlspecialchars($_POST['titulo']));
+        $_POST['titulo'] = ucwords(strtolower(trim(htmlspecialchars($_POST['titulo']))));
         $_POST['autor'] = trim(htmlspecialchars($_POST['autor']));
         
         if (strlen($_POST['titulo']) < 2) {
