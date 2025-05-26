@@ -18,13 +18,36 @@
                 <img src="<?= asset('images/cit.png') ?>" alt="Logo" width="32" height="32" class="me-2">
                 BIBLIOTECA LAURA
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/parcial1_jmp/libros">Libros</a>
+                        <a class="nav-link" href="/parcial1_jmp/">
+                            <i class="bi bi-house me-1"></i>Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/parcial1_jmp/libros">
+                            <i class="bi bi-book me-1"></i>Libros
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/parcial1_jmp/prestamos">
+                            <i class="bi bi-person-check me-1"></i>Préstamos
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-gear me-1"></i>Opciones
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#" onclick="alert('Reportes - Por implementar'); return false;"><i class="bi bi-file-text me-2"></i>Reportes</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="alert('Configuración - Por implementar'); return false;"><i class="bi bi-gear me-2"></i>Configuración</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="alert('Ayuda - Por implementar'); return false;"><i class="bi bi-question-circle me-2"></i>Ayuda</a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>

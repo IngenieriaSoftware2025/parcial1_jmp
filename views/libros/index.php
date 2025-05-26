@@ -45,7 +45,9 @@
         <div class="col-lg-11">
             <div class="card shadow-lg border-primary rounded-4">
                 <div class="card-body">
-                    <h3 class="text-center text-primary mb-4">Libros en la Biblioteca</h3>
+                    <h3 class="text-center text-primary mb-4">
+                        <i class="bi bi-books me-2"></i>Libros en la Biblioteca
+                    </h3>
                     <div class="table-responsive">
                         <table class="table table-striped table-hover table-bordered align-middle rounded-3 overflow-hidden" id="TableLibros">
                         </table>

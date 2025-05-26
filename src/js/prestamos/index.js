@@ -4,17 +4,16 @@ import { validarFormulario } from '../funciones';
 import DataTable from "datatables.net-bs5";
 import { lenguaje } from "../lenguaje";
 
-const FormLibros = document.getElementById('FormLibros');
+const FormPrestamos = document.getElementById('FormPrestamos');
 const BtnGuardar = document.getElementById('BtnGuardar');
-const BtnModificar = document.getElementById('BtnModificar');
 const BtnLimpiar = document.getElementById('BtnLimpiar');
+const selectLibro = document.getElementById('libro_id');
 
-const GuardarLibro = async (event) => {
-
+const GuardarPrestamo = async (event) => {
     event.preventDefault();
     BtnGuardar.disabled = true;
 
-    if (!validarFormulario(FormLibros, ['id'])) {
+    if (!validarFormulario(FormPrestamos, ['id'])) {
         Swal.fire({
             position: "center",
             icon: "info",
@@ -23,10 +22,11 @@ const GuardarLibro = async (event) => {
             showConfirmButton: true,
         });
         BtnGuardar.disabled = false;
+        return;
     }
 
-    const body = new FormData(FormLibros);
-    const url = '/parcial1_jmp/libros/guardarAPI';
+    const body = new FormData(FormPrestamos);
+    const url = '/parcial1_jmp/prestamos/guardarAPI';
     const config = {
         method: 'POST',
         body
@@ -48,10 +48,10 @@ const GuardarLibro = async (event) => {
             });
 
             limpiarTodo();
-            BuscarLibros();
+            BuscarPrestamos();
+            CargarLibrosDisponibles();
 
         } else {
-            
             await Swal.fire({
                 position: "center",
                 icon: "error",
@@ -67,8 +67,8 @@ const GuardarLibro = async (event) => {
     BtnGuardar.disabled = false;
 }
 
-const BuscarLibros = async () => {
-    const url = `/parcial1_jmp/libros/buscarAPI`;
+const BuscarPrestamos = async () => {
+    const url = `/parcial1_jmp/prestamos/buscarAPI`;
     const config = {
         method: 'GET'
     }
@@ -96,7 +96,34 @@ const BuscarLibros = async () => {
     }
 }
 
-const datatable = new DataTable('#TableLibros', {
+const CargarLibrosDisponibles = async () => {
+    const url = `/parcial1_jmp/prestamos/librosDisponiblesAPI`;
+    const config = {
+        method: 'GET'
+    }
+
+    try {
+        const respuesta = await fetch(url, config);
+        const datos = await respuesta.json();
+        const { codigo, data } = datos
+
+        if (codigo == 1) {
+            selectLibro.innerHTML = '<option value="">Seleccione un libro</option>';
+            
+            data.forEach(libro => {
+                const option = document.createElement('option');
+                option.value = libro.id;
+                option.textContent = `${libro.titulo} - ${libro.autor}`;
+                selectLibro.appendChild(option);
+            });
+        }
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const datatable = new DataTable('#TablePrestamos', {
     dom: `
         <"row mt-3 justify-content-between" 
             <"col" l> 
@@ -111,6 +138,7 @@ const datatable = new DataTable('#TableLibros', {
     `,
     language: lenguaje,
     data: [],
+    order: [[4, 'desc']],
     columns: [
         {
             title: 'No.',
@@ -118,16 +146,26 @@ const datatable = new DataTable('#TableLibros', {
             width: '%',
             render: (data, type, row, meta) => meta.row + 1
         },
-        { title: 'Título', data: 'titulo' },
+        { title: 'Libro', data: 'titulo' },
         { title: 'Autor', data: 'autor' },
+        { title: 'Prestado a', data: 'persona_prestado' },
+        { 
+            title: 'Fecha Préstamo', 
+            data: 'fecha_prestamo',
+            render: (data) => {
+                const fecha = new Date(data);
+                return fecha.toLocaleDateString('es-ES');
+            }
+        },
         {
             title: 'Estado',
-            data: 'persona_prestado',
+            data: 'devuelto',
             render: (data, type, row) => {
-                if (data && data.trim() !== '') {
-                    return `<span class="badge bg-warning">Prestado a: ${data}</span>`;
+                if (data === 'S') {
+                    const fechaDevolucion = new Date(row.fecha_devolucion);
+                    return `<span class="badge bg-success">Devuelto (${fechaDevolucion.toLocaleDateString('es-ES')})</span>`;
                 } else {
-                    return `<span class="badge bg-success">Disponible</span>`;
+                    return `<span class="badge bg-warning">Prestado</span>`;
                 }
             }
         },
@@ -137,110 +175,96 @@ const datatable = new DataTable('#TableLibros', {
             searchable: false,
             orderable: false,
             render: (data, type, row, meta) => {
-                return `
-                 <div class='d-flex justify-content-center'>
-                     <button class='btn btn-warning modificar mx-1' 
-                         data-id="${data}" 
-                         data-titulo="${row.titulo}"  
-                         data-autor="${row.autor}"  
-                         data-persona_prestado="${row.persona_prestado || ''}"  
-                         <i class='bi bi-pencil-square me-1'></i> Modificar
-                     </button>
-                     <button class='btn btn-danger eliminar mx-1' 
-                         data-id="${data}">
+                let botones = '';
+                
+                if (row.devuelto === 'N') {
+                    botones += `
+                        <button class='btn btn-success devolver mx-1' 
+                            data-id="${data}">
+                            <i class='bi bi-check-circle me-1'></i> Devolver
+                        </button>`;
+                }
+                
+                botones += `
+                    <button class='btn btn-danger eliminar mx-1' 
+                        data-id="${data}">
                         <i class="bi bi-trash3 me-1"></i>Eliminar
-                     </button>
-                 </div>`;
+                    </button>`;
+                
+                return `<div class='d-flex justify-content-center'>${botones}</div>`;
             }
         }
     ]
 });
 
-const llenarFormulario = (event) => {
-    const datos = event.currentTarget.dataset
-
-    document.getElementById('id').value = datos.id
-    document.getElementById('titulo').value = datos.titulo
-    document.getElementById('autor').value = datos.autor
-    document.getElementById('persona_prestado').value = datos.persona_prestado
-
-    BtnGuardar.classList.add('d-none');
-    BtnModificar.classList.remove('d-none');
-
-    window.scrollTo({
-        top: 0,
-    })
-}
-
 const limpiarTodo = () => {
-    FormLibros.reset();
-    BtnGuardar.classList.remove('d-none');
-    BtnModificar.classList.add('d-none');
+    FormPrestamos.reset();
 }
 
-const ModificarLibro = async (event) => {
-    event.preventDefault();
-    BtnModificar.disabled = true;
+const DevolverLibro = async (e) => {
+    const idPrestamo = e.currentTarget.dataset.id
 
-    if (!validarFormulario(FormLibros, [''])) {
-        Swal.fire({
-            position: "center",
-            icon: "info",
-            title: "FORMULARIO INCOMPLETO",
-            text: "Debe completar todos los campos obligatorios",
-            showConfirmButton: true,
-        });
-        BtnModificar.disabled = false;
-        return;
-    }
+    const AlertaConfirmarDevolucion = await Swal.fire({
+        position: "center",
+        icon: "question",
+        title: "¿Confirmar devolución?",
+        text: 'Se marcará el libro como devuelto',
+        showConfirmButton: true,
+        confirmButtonText: 'Sí, Devolver',
+        confirmButtonColor: '#28a745',
+        cancelButtonText: 'Cancelar',
+        showCancelButton: true
+    });
 
-    const body = new FormData(FormLibros);
-    const url = '/parcial1_jmp/libros/modificarAPI';
-    const config = {
-        method: 'POST',
-        body
-    }
-
-    try {
-        const respuesta = await fetch(url, config);
-        const datos = await respuesta.json();
-        const { codigo, mensaje } = datos
-
-        if (codigo == 1) {
-            await Swal.fire({
-                position: "center",
-                icon: "success",
-                title: "Éxito",
-                text: mensaje,
-                showConfirmButton: true,
-            });
-
-            limpiarTodo();
-            BuscarLibros();
-
-        } else {
-            await Swal.fire({
-                position: "center",
-                icon: "error",
-                title: "Error",
-                text: mensaje,
-                showConfirmButton: true,
-            });
+    if (AlertaConfirmarDevolucion.isConfirmed) {
+        const body = new FormData();
+        body.append('id', idPrestamo);
+        
+        const url = '/parcial1_jmp/prestamos/devolverAPI';
+        const config = {
+            method: 'POST',
+            body
         }
 
-    } catch (error) {
-        console.log(error)
+        try {
+            const consulta = await fetch(url, config);
+            const respuesta = await consulta.json();
+            const { codigo, mensaje } = respuesta;
+
+            if (codigo == 1) {
+                await Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: "Éxito",
+                    text: mensaje,
+                    showConfirmButton: true,
+                });
+                
+                BuscarPrestamos();
+                CargarLibrosDisponibles();
+            } else {
+                await Swal.fire({
+                    position: "center",
+                    icon: "error",
+                    title: "Error",
+                    text: mensaje,
+                    showConfirmButton: true,
+                });
+            }
+
+        } catch (error) {
+            console.log(error)
+        }
     }
-    BtnModificar.disabled = false;
 }
 
-const EliminarLibro = async (e) => {
-    const idLibro = e.currentTarget.dataset.id
+const EliminarPrestamo = async (e) => {
+    const idPrestamo = e.currentTarget.dataset.id
 
     const AlertaConfirmarEliminar = await Swal.fire({
         position: "center",
         icon: "warning",
-        title: "¿Desea eliminar este libro?",
+        title: "¿Desea eliminar este préstamo?",
         text: 'Esta acción no se puede deshacer',
         showConfirmButton: true,
         confirmButtonText: 'Sí, Eliminar',
@@ -250,7 +274,7 @@ const EliminarLibro = async (e) => {
     });
 
     if (AlertaConfirmarEliminar.isConfirmed) {
-        const url =`/parcial1_jmp/libros/eliminar?id=${idLibro}`;
+        const url =`/parcial1_jmp/prestamos/eliminar?id=${idPrestamo}`;
         const config = {
             method: 'GET'
         }
@@ -269,7 +293,8 @@ const EliminarLibro = async (e) => {
                     showConfirmButton: true,
                 });
                 
-                BuscarLibros();
+                BuscarPrestamos();
+                CargarLibrosDisponibles();
             } else {
                 await Swal.fire({
                     position: "center",
@@ -286,9 +311,12 @@ const EliminarLibro = async (e) => {
     }
 }
 
-BuscarLibros();
-datatable.on('click', '.eliminar', EliminarLibro);
-datatable.on('click', '.modificar', llenarFormulario);
-FormLibros.addEventListener('submit', GuardarLibro);
+// Inicializar
+BuscarPrestamos();
+CargarLibrosDisponibles();
+
+// Event Listeners
+datatable.on('click', '.eliminar', EliminarPrestamo);
+datatable.on('click', '.devolver', DevolverLibro);
+FormPrestamos.addEventListener('submit', GuardarPrestamo);
 BtnLimpiar.addEventListener('click', limpiarTodo);
-BtnModificar.addEventListener('click', ModificarLibro);

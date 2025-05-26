@@ -7,7 +7,7 @@ use Model\ActiveRecord;
 use Model\Prestamos;
 use MVC\Router;
 
-class PrestamosController extends ActiveRecord {
+class PrestamoController extends ActiveRecord {
     
     public static function renderizarPagina(Router $router) {
         $router->render('prestamos/index', []);
@@ -143,13 +143,13 @@ class PrestamosController extends ActiveRecord {
     
     public static function librosDisponiblesAPI() {
         try {
-            $sql = "SELECT * FROM libros WHERE persona_prestado IS NULL OR persona_prestado = '' ORDER BY titulo";
+            $sql = "SELECT * FROM libros ORDER BY titulo";
             $data = self::fetchArray($sql);
             
             http_response_code(200);
             echo json_encode([
                 'codigo' => 1,
-                'mensaje' => 'Libros disponibles obtenidos correctamente',
+                'mensaje' => 'Libros obtenidos correctamente',
                 'data' => $data
             ]);
             
@@ -157,7 +157,7 @@ class PrestamosController extends ActiveRecord {
             http_response_code(400);
             echo json_encode([
                 'codigo' => 0,
-                'mensaje' => 'Error al obtener libros disponibles',
+                'mensaje' => 'Error al obtener libros',
                 'detalle' => $e->getMessage()
             ]);
         }
