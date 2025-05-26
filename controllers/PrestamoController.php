@@ -16,8 +16,8 @@ class PrestamoController extends ActiveRecord {
     public static function guardarAPI() {
         getHeadersApi();
         
-        $_POST['libro_id'] = trim(htmlspecialchars($_POST['libro_id']));
-        $_POST['persona_prestado'] = trim(htmlspecialchars($_POST['persona_prestado']));
+        $_POST['libro_id'] = ucwords(strtolower(trim(htmlspecialchars($_POST['libro_id']))));
+        $_POST['persona_prestado'] = ucwords(strtolower(trim(htmlspecialchars($_POST['persona_prestado']))));
         
         if (strlen($_POST['persona_prestado']) < 2) {
             http_response_code(400);

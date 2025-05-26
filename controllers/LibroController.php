@@ -17,7 +17,7 @@ class LibroController extends ActiveRecord {
         getHeadersApi();
         
         $_POST['titulo'] = ucwords(strtolower(trim(htmlspecialchars($_POST['titulo']))));
-        $_POST['autor'] = trim(htmlspecialchars($_POST['autor']));
+        $_POST['autor'] = ucwords(strtolower(trim(htmlspecialchars($_POST['autor']))));
         
         if (strlen($_POST['titulo']) < 2) {
             http_response_code(400);
@@ -88,8 +88,8 @@ class LibroController extends ActiveRecord {
         
         $id = $_POST['id'];
         
-        $_POST['titulo'] = trim(htmlspecialchars($_POST['titulo']));
-        $_POST['autor'] = trim(htmlspecialchars($_POST['autor']));
+        $_POST['titulo'] = ucwords(strtolower(trim(htmlspecialchars($_POST['titulo']))));
+        $_POST['autor'] = ucwords(strtolower(trim(htmlspecialchars($_POST['autor']))));
         
         if (strlen($_POST['titulo']) < 2) {
             http_response_code(400);
