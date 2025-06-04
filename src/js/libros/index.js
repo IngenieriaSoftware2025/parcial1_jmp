@@ -160,8 +160,7 @@ const llenarFormulario = (event) => {
     document.getElementById('id').value = datos.id
     document.getElementById('titulo').value = datos.titulo
     document.getElementById('autor').value = datos.autor
-    // ✅ ELIMINAMOS esta línea que causaba el error:
-    // document.getElementById('persona_prestado').value = datos.persona_prestado
+
 
     BtnGuardar.classList.add('d-none');
     BtnModificar.classList.remove('d-none');
